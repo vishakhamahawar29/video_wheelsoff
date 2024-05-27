@@ -61,7 +61,11 @@ let roomName = null;
   }
 
   muteVideoBtn.onclick = () => {
+
+    console.log("🚀 ~ onclick  muteVideoBtn:")
+
     const mute = !muteVideoBtn.classList.contains('muted');
+    console.log("🚀 ~  muteVideoBtn mute:", mute)
 
     if(mute) {
       muteYourVideo(roomP1);
