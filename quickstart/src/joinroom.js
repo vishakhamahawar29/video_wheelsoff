@@ -83,7 +83,7 @@ function setupParticipantContainer(participant, room) {
   // Add a container for the Participant's media.
   const $container = $(`<div class="participant" data-identity="${identity}" id="${sid}">
     <audio autoplay ${participant === room.localParticipant ? 'muted' : ''} style="opacity: 0"></audio>
-    <video autoplay muted playsinline style="opacity: 0" id="video_main"></video>
+    <video autoplay muted playsinline style="opacity: 0"></video>
   </div>`);
 
   // Toggle the pinning of the active Participant's video.
@@ -457,23 +457,17 @@ document.getElementById("myDropdown").addEventListener("change", handleOptionSel
  * @param {'mute'|'unmute'} action - Whether you want to mute/unmute
  */
 function muteOrUnmuteYourMedia(room, kind, action) {
-  console.log("🚀 ~ muteOrUnmuteYourMedia ~ action:", action)
-  console.log("🚀 ~ muteOrUnmuteYourMedia ~ kind:", kind)
-  console.log("🚀 ~ muteOrUnmuteYourMedia ~ room:", room)
   const publications = kind === 'audio'
     ? room.localParticipant.audioTracks
     : room.localParticipant.videoTracks;
 
-    publications.forEach((publication) => {
-      if (action === 'mute') {
-        console.log(" muteOrUnmuteYourMedia publication 111", publication)
-        publication.track.disable();
-      } else {
-        console.log(" muteOrUnmuteYourMedia publication 222", publication)
-        publication.track.enable();
-      }
-    })
-
+  publications.forEach(function(publication) {
+    if (action === 'mute') {
+      publication.track.disable();
+    } else {
+      publication.track.enable();
+    }
+  });
 }
 
 /**
@@ -490,18 +484,12 @@ function muteYourAudio(room) {
  * @param {Room} room - The Room you have joined
  * @returns {void}
  */
-
-
-// changes button 
- function muteYourVideo(room) {
-  console.log("🚀 ~ muteYourVideo called");
-  console.log("🚀 ~ muteYourVideo ~ room:", room);
-
+function muteYourVideo(room) {
   if (videoProcessor) {
     localVideoTrack.removeProcessor(videoProcessor);
-    // videoProcessor = null;
+    
   }
- muteOrUnmuteYourMedia(room, 'video', 'mute');
+  muteOrUnmuteYourMedia(room, 'video', 'mute');
 }
 
 /**
@@ -519,10 +507,10 @@ function unmuteYourAudio(room) {
  * @returns {void}
  */
 function unmuteYourVideo(room) {
-  // if(videoProcessor)
-  // {
-  // localVideoTrack.addProcessor(videoProcessor);
-  // }
+  if(videoProcessor)
+  {
+  localVideoTrack.addProcessor(videoProcessor);
+  }
   muteOrUnmuteYourMedia(room, 'video', 'unmute');
 }
 //examples
@@ -566,52 +554,9 @@ muteAudioBtn.onclick = () => {
   }
 }
 
-const dropdown = document.getElementById('dropdown');
-const videoButton = document.getElementById('videoButton');
-
-let storedOptionId = null;
-let isMuted = false;
-
-videoButton.addEventListener('click', () => {
-    if (!isMuted) {
-        // Store current option
-        const selectedOption = dropdown.options[dropdown.selectedIndex];
-        storedOptionId = selectedOption.id;
-
-        // Set dropdown to option1
-        const option1 = dropdown.querySelector('#option1');
-        option1.selected = true;
-
-        // Mute video logic
-        muteYourVideo(); // Assuming you have a function to mute the video
-
-        console.log('Video muted, selected option set to option1');
-    } else {
-        // Restore previous option
-        if (storedOptionId) {
-            const storedOption = dropdown.querySelector(`#${storedOptionId}`);
-            if (storedOption) {
-                storedOption.selected = true;
-            }
-        }
-
-        // Unmute video logic
-        unmuteYourVideo(); // Assuming you have a function to unmute the video
-
-        console.log('Video unmuted, restored option:', storedOptionId);
-    }
-
-    isMuted = !isMuted;
-});
-
-
 muteVideoBtn.onclick = () => {
-  console.log("🚀 ~ onclick  muteVideoBtn:")
-
   const mute = !muteVideoBtn.classList.contains('muted');
-  console.log("🚀 ~ muteVideoBtn  mute:", mute)
   const myImg2 = document.getElementById('vidoimg');
-  console.log("🚀 ~ muteVideoBtn myImg2:", myImg2)
 
 
   if(mute) {
