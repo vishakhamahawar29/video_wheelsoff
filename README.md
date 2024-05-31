@@ -22,6 +22,7 @@ Reconnection State
 ![State](reconnectstatus.png)
 
 Codec
+![codec](codec.png)
 
 # Twilio Video Quickstart for JavaScript
 
