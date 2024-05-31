@@ -1,6 +1,27 @@
 **NEW:** The [Local Video Filter](examples/localvideofilter) example has been updated to use the recently released [Video Processor API](https://github.com/twilio/twilio-video.js/releases/tag/2.13.0) for Chrome.
 # Functionality Integrated
+Main View
 ![Main View: ](main_view.png)
+
+Mute Video
+![Video](mutevideo.png)
+
+Mute Audio
+![Audio](muteaudio.png)
+
+Screenshare
+![screenshare](screenshare.png)
+
+Snapshot
+![Snapshot](screenshot.png)
+
+Filter
+![Filter](filter.png)
+
+Reconnection State
+![State](reconnectstatus.png)
+
+Codec
 
 # Twilio Video Quickstart for JavaScript
 
