@@ -9,6 +9,25 @@ const $room = $('#room');
 const $activeParticipant = $('div#active-participant > div.participant.main', $room);
 const $activeVideo = $('video', $activeParticipant);
 const $participants = $('div#participants', $room);
+const { muteYourAudio, unmuteYourAudio, muteYourVideo, unmuteYourVideo } = require('./helpers/localMediahelpers');
+var Snapshothelpers = require('./helpers/Snapshothelpers.js');
+var displayLocalVideo = Snapshothelpers.displayLocalVideo;
+var takeLocalVideoSnapshot = Snapshothelpers.takeLocalVideoSnapshot;
+var canvas = document.querySelector('.snapshot-canvas');
+var img = document.querySelector('.snapshot-img');
+var takeSnapshot = document.querySelector('button#takesnapshot');
+var video = document.querySelector('video#video_main');
+const popupContainer = document.getElementById('popup-container');
+const closePopupButton = document.getElementById('close-popup');
+const helpers = require('./helpers/Screensharehelpers');
+const createScreenTrack = helpers.createScreenTrack;
+const captureScreen = document.querySelector('button#capturescreen');
+const screenPreview = document.querySelector('video#screenpreview');
+const stopScreenCapture = document.querySelector('button#stopscreencapture');
+const { setupReconnectionUpdates } = require('./helpers/connectionstateshelper')
+const { handleLocalParticipantReconnectionUpdates, handleRemoteParticipantReconnectionUpdates } = require('./helpers/rpcstatushelper');
+const { showSnackBar } = require('./helpers/snackbar');
+
 
 let $container;
 
@@ -237,28 +256,15 @@ function trackPublished(publication, participant) {
  let localVideoTrack;
 
 
-async function joinRoom(token, ConnectOption) {
+async function joinRoom(token, ConnectOption) 
+{
   // Comment the next two lines to disable verbose logging.
   const logger = Logger.getLogger('twilio-video');
   logger.setLevel('debug');
 
   // Join to the Room with the given AccessToken and ConnectOptions.
   const room = await connect(token, ConnectOption);
-
-  // Save the LocalVideoTrack.
-  // let localVideoTrack = Array.from(room.localParticipant.videoTracks.values())[0].track;
-
-  // // Apply filter to the local video track
-   
-
-  // const videoProcessor = {
-  //       processFrame: (inputFrame, outputFrame) => {
-  //         const ctx = outputFrame.getContext('2d');
-  //         ctx.filter = 'grayscale(100%)';
-  //         ctx.drawImage(inputFrame, 0, 0);
-  //       }
-  //     };
-
+  
   // Add event listeners to each option
   videoProcessor = null; 
   localVideoTrack = Array.from(room.localParticipant.videoTracks.values())[0].track;
@@ -333,33 +339,37 @@ async function joinRoom(token, ConnectOption) {
   
     localVideoTrack.addProcessor(videoProcessor);
   }
+  
   }
-
-
-
-document.getElementById("myDropdown").addEventListener("change", handleOptionSelection);
-
-
-
+  document.getElementById("myDropdown").addEventListener("change", handleOptionSelection);
 
   // Make the Room available in the JavaScript console for debugging.
   window.room = room;
 
   // Handle the LocalParticipant's media.
   participantConnected(room.localParticipant, room);
+  document.getElementById('message').innerHTML = 'Connected to Room : ' + room.name;
+
+  setupReconnectionUpdates(room);
+
+  handleRemoteParticipantReconnectionUpdates(room);
+  handleLocalParticipantReconnectionUpdates(room);
 
   // Subscribe to the media published by RemoteParticipants already in the Room.
   room.participants.forEach(participant => {
+    showSnackBar(participant.identity + ": " + participant.state);
     participantConnected(participant, room);
   });
 
   // Subscribe to the media published by RemoteParticipants joining the Room later.
   room.on('participantConnected', participant => {
+    showSnackBar(participant.identity + ": " + participant.state);
     participantConnected(participant, room);
   });
 
   // Handle a disconnected RemoteParticipant.
   room.on('participantDisconnected', participant => {
+    showSnackBar(participant.identity + ": " + participant.state);
     participantDisconnected(participant, room);
   });
 
@@ -448,89 +458,10 @@ document.getElementById("myDropdown").addEventListener("change", handleOptionSel
       }
     });
   });
+
 }
 
-/** EXAMPLE 1
- * Mute/unmute your media in a Room.
- * @param {Room} room - The Room you have joined
- * @param {'audio'|'video'} kind - The type of media you want to mute/unmute
- * @param {'mute'|'unmute'} action - Whether you want to mute/unmute
- */
-function muteOrUnmuteYourMedia(room, kind, action) {
-  const publications = kind === 'audio'
-    ? room.localParticipant.audioTracks
-    : room.localParticipant.videoTracks;
-
-  publications.forEach(function(publication) {
-    if (action === 'mute') {
-      publication.track.disable();
-    } else {
-      publication.track.enable();
-    }
-  });
-}
-
-/**
- * Mute your audio in a Room.
- * @param {Room} room - The Room you have joined
- * @returns {void}
- */
-function muteYourAudio(room) {
-  muteOrUnmuteYourMedia(room, 'audio', 'mute');
-}
-
-/**
- * Mute your video in a Room.
- * @param {Room} room - The Room you have joined
- * @returns {void}
- */
-function muteYourVideo(room) {
-  if (videoProcessor) {
-    localVideoTrack.removeProcessor(videoProcessor);
-    
-  }
-  muteOrUnmuteYourMedia(room, 'video', 'mute');
-}
-
-/**
- * Unmute your audio in a Room.
- * @param {Room} room - The Room you have joined
- * @returns {void}
- */
-function unmuteYourAudio(room) {
-  muteOrUnmuteYourMedia(room, 'audio', 'unmute');
-}
-
-/**
- * Unmute your video in a Room.
- * @param {Room} room - The Room you have joined
- * @returns {void}
- */
-function unmuteYourVideo(room) {
-  if(videoProcessor)
-  {
-  localVideoTrack.addProcessor(videoProcessor);
-  }
-  muteOrUnmuteYourMedia(room, 'video', 'unmute');
-}
-//examples
-/**
- * A RemoteParticipant muted or unmuted its media.
- * @param {Room} room - The Room you have joined
- * @param {function} onMutedMedia - Called when a RemoteParticipant muted its media
- * @param {function} onUnmutedMedia - Called when a RemoteParticipant unmuted its media
- * @returns {void}
- */
-function participantMutedOrUnmutedMedia(room, onMutedMedia, onUnmutedMedia) {
-  room.on('trackSubscribed', function(track, publication, participant) {
-    track.on('disabled', function() {
-      return onMutedMedia(track, participant);
-    });
-    track.on('enabled', function() {
-      return onUnmutedMedia(track, participant);
-    });
-  });
-}
+/*-------------------- Local Media Control --------------------------*/
 
 muteAudioBtn.onclick = () => {
   const mute = !muteAudioBtn.classList.contains('muted');
@@ -554,9 +485,11 @@ muteAudioBtn.onclick = () => {
   }
 }
 
+
 muteVideoBtn.onclick = () => {
   const mute = !muteVideoBtn.classList.contains('muted');
   const myImg2 = document.getElementById('vidoimg');
+  
 
 
   if(mute) {
@@ -571,24 +504,9 @@ muteVideoBtn.onclick = () => {
     
   }
 }
+/*-------------------- End Local Media Control --------------------------*/
 
-exports.muteYourAudio = muteYourAudio;
-exports.muteYourVideo = muteYourVideo;
-exports.unmuteYourAudio = unmuteYourAudio;
-exports.unmuteYourVideo = unmuteYourVideo;
-exports.participantMutedOrUnmutedMedia = participantMutedOrUnmutedMedia;
-
-// Snapshot
-var Snapshothelpers = require('./Snapshothelpers.js');
-var displayLocalVideo = Snapshothelpers.displayLocalVideo;
-var takeLocalVideoSnapshot = Snapshothelpers.takeLocalVideoSnapshot;
-
-var canvas = document.querySelector('.snapshot-canvas');
-var img = document.querySelector('.snapshot-img');
-var takeSnapshot = document.querySelector('button#takesnapshot');
-var video = document.querySelector('video#video_main');
-const popupContainer = document.getElementById('popup-container');
-const closePopupButton = document.getElementById('close-popup');
+/*-------------------- Start Snapshot --------------------------*/
 
 let videoTrack;
 let el;
@@ -629,19 +547,12 @@ displayLocalVideo(video).then(function(localVideoTrack) {
 window.onresize = function() {
   setSnapshotSizeToVideo(el, videoTrack);
 };
+/*-------------------- End Snapshot --------------------------*/
 
 
 
+/*-------------------- Start Screenshare --------------------------*/
 
-//Screenshare
-const helpers = require('./Screensharehelpers');
-const createScreenTrack = helpers.createScreenTrack;
-const captureScreen = document.querySelector('button#capturescreen');
-const screenPreview = document.querySelector('video#screenpreview');
-const stopScreenCapture = document.querySelector('button#stopscreencapture');
-//const remoteScreenPreview = document.querySelector('video.remote-screenpreview');
-
- 
   // Hide the "Stop Capture Screen" button.
   stopScreenCapture.style.display = 'none';
 
@@ -742,8 +653,7 @@ function onTrackPublished(publishType, publication, view) {
   }
 }
 
-
-
+/*-------------------- End Screenshare --------------------------*/
 
 
 

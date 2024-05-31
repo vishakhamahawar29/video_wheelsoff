@@ -45,6 +45,11 @@
           </div>
         </div>
       </div>
+
+      <div id="snackbar"></div>
+
+      
+        
       <div id="userControls">
         <button id="muteAudioBtn" style="height:90px;width: 90px;" >
           <img id="audioimg" src="unmute.png" width="100%" 
@@ -56,7 +61,7 @@
          height="100%" alt=""  />  
         </button>
        
-     
+       
     
         <button id="takesnapshot" style="height:90px;width:90px">
           <img id="screenimg4" src="snapshot.png" width="100%" 
@@ -78,6 +83,9 @@
             <option value="3" id="option4">Watermark</option>
           </select>
           </div>
+
+          <p id="message">Connecting to room...</p>
+
       </div>
       <!-- The pop-up container -->
     <div class="popup-container" id="popup-container">
@@ -179,30 +187,9 @@
                     <span id="selectedvideocodec"></span>
                   </div>
                 </div>
-                <div class="form-group">
-                  <label class="form-text text-muted">Max Audio Bitrate (bps)</label>
-                  <select id="maxaudiobitrate" name="maxaudiobitrate" class="form-control">
-                    <option value="">No limit</option>
-                    <option value="16000">16000</option>
-                    <option value="32000">32000</option>
-                    <option value="64000">64000</option>
-                  </select>
-                 
-                </div>
-                <div class="form-group">
-                  <label class="form-text text-muted">Max Video Bitrate (bps)</label>
-                  <select id="maxvideobitrate" name="maxvideobitrate" class="form-control">
-                    <option value="">No limit</option>
-                    <option value="64000">64000</option>
-                    <option value="128000">128000</option>
-                    <option value="256000">256000</option>
-                    <option value="512000">512000</option>
-                  </select>
-                  
-                </div>
-
                 
-            
+                
+
               
                 
 
