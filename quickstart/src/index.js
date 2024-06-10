@@ -16,8 +16,6 @@ const $showErrorModal = $('#show-error', $modals);
 const $joinRoomModal = $('#join-room', $modals);
 const videoCodecSelector = document.querySelector('select#preferredvideocodec');
 const audioCodecSelector = document.querySelector('select#preferredaudiocodec');
-const audioBitrateSelector = document.querySelector('select#maxaudiobitrate');
-const videoBitrateSelector = document.querySelector('select#maxvideobitratec');
 
 
 
@@ -105,8 +103,8 @@ async function selectAndJoinRoom(error = null) {
 
     // Add the specified video device ID to ConnectOptions.
     connectOptions.video.deviceId = { exact: deviceIds.video };
-     
-  
+    
+    
     connectOptions.preferredVideoCodecs =videoCodecSelector.value? [videoCodecSelector.value]:[];
 
     connectOptions.preferredAudioCodecs=audioCodecSelector.value? [audioCodecSelector.value]:[];

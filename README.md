@@ -35,7 +35,7 @@ _For Twilio Video 1.x Quickstart, go [here](https://github.com/twilio/video-quic
 This application should give you a ready-made starting point for writing your
 own video apps with Twilio Video.
 
-![screenshot of chat app](quickstart/public/quickstart.png)
+![screenshot of chat app](quickstart/public/images/quickstart.png)
 
 ## Setup Requirements
 

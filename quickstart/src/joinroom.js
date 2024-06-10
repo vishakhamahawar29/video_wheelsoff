@@ -1,7 +1,7 @@
 'use strict';
 
 
-const { connect, createLocalVideoTrack, Logger,  } = require('twilio-video');
+const { connect, createLocalVideoTrack, Logger  } = require('twilio-video');
 const { isMobile } = require('./browser');
 
 const $leave = $('#leave-room');
@@ -27,6 +27,8 @@ const stopScreenCapture = document.querySelector('button#stopscreencapture');
 const { setupReconnectionUpdates } = require('./helpers/connectionstateshelper')
 const { handleLocalParticipantReconnectionUpdates, handleRemoteParticipantReconnectionUpdates } = require('./helpers/rpcstatushelper');
 const { showSnackBar } = require('./helpers/snackbar');
+
+
 
 
 let $container;
@@ -459,6 +461,7 @@ async function joinRoom(token, ConnectOption)
     });
   });
 
+
 }
 
 /*-------------------- Local Media Control --------------------------*/
@@ -472,14 +475,14 @@ muteAudioBtn.onclick = () => {
   if(mute) {
     muteYourAudio(room);
     muteAudioBtn.classList.add('muted');
-    myImg.src = "mute.png";
+    myImg.src = "images/mute.png";
     activeIcon.id = 'inactiveIcon';
     inactiveIcon.id = 'activeIcon';
 
   } else {
     unmuteYourAudio(room);
     muteAudioBtn.classList.remove('muted');
-    myImg.src = "unmute.png";
+    myImg.src = "images/unmute.png";
     activeIcon.id = 'inactiveIcon';
    inactiveIcon.id = 'activeIcon';
   }
@@ -494,12 +497,19 @@ muteVideoBtn.onclick = () => {
 
   if(mute) {
     muteYourVideo(room);
-    myImg2.src = "mutevideo.png";
+    if (videoProcessor) {
+      localVideoTrack.removeProcessor(videoProcessor);
+    }
+    myImg2.src = "images/mutevideo.png";
     muteVideoBtn.classList.add('muted');
     
   } else {
     unmuteYourVideo(room);
-    myImg2.src = "unmutevideo.png";
+  
+    if(videoProcessor)
+      localVideoTrack.addProcessor(videoProcessor);
+    
+    myImg2.src = "images/unmutevideo.png";
     muteVideoBtn.classList.remove('muted');
     
   }
@@ -536,6 +546,8 @@ function setSnapshotSizeToVideo(snapshot, video) {
 displayLocalVideo(video).then(function(localVideoTrack) {
   // Display a snapshot of the LocalVideoTrack on the canvas.
   videoTrack = localVideoTrack;
+ 
+  
   takeSnapshot.onclick = function() {
     popupContainer.style.display = 'block';
     setSnapshotSizeToVideo(el, localVideoTrack);
@@ -567,7 +579,7 @@ window.onresize = function() {
       muteVideoBtn.disabled=true;
       // Publish screen track to room
       await room.localParticipant.publishTrack(screenTrack);
-     await room.localParticipant.unpublishTrack(videoTrack);
+     await room.localParticipant.unpublishTrack(localVideoTrack);
      
      
       // Show the "Stop Capture Screen" button.
@@ -578,8 +590,12 @@ window.onresize = function() {
         if (room) {
           toggleButtons();
           room.localParticipant.unpublishTrack(screenTrack); 
+          if (videoProcessor) {
+            localVideoTrack.removeProcessor(videoProcessor);
+            localVideoTrack.addProcessor(videoProcessor);
+          }
           
-          room.localParticipant.publishTrack(videoTrack); 
+          room.localParticipant.publishTrack(localVideoTrack); 
           
           
           
